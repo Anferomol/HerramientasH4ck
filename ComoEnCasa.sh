@@ -246,5 +246,3 @@ if [ $ERROR = 1 ]; then
 else
     echo "Todo ha salido perfecto, ni un solo error ¡ENHORABUENA!"
 fi
-
-#   FIN Mensaje Final
