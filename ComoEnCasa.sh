@@ -201,6 +201,8 @@ if [ "$(echo $?)" = "1" ]; then
 fi
 #   FIN Instalación hollywood
 
+############### impacket-smbserver smbFolder $(pwd) -smb2support -username Andres -password Andres123
+
 #   Mensaje Final
 
 echo "Recomendaciones:
