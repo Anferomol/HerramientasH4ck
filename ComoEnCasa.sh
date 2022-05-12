@@ -21,7 +21,7 @@
 #   Default Variables
 
     Terminal = qterminal
-    ERROR=0
+    Directory = $(pwd)
 
 #   Actualizar todo el sistema
 sudo apt update 2>/dev/null
@@ -36,54 +36,80 @@ sudo apt install build-essential git vim xcb libxcb-util0-dev libxcb-ewmh-dev li
 
 sleep 1s
 
+errores = ()
+
+function install {
+    sudo apt install $1 -y
+    if [ $? -eq 1 ]; then
+        errores+=($1)
+    fi
+}
+
 #   Instalación de fzf
-sudo apt install fzf -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_fzf=1
-fi
-#   FIN Instalación de fzf
+install fzf
+
+#   Instalación de Ngrok
+install ngrok
 
 #   Instalación de Ranger
-sudo apt install ranger -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_ranger=1
-fi
-#   FIN Instalación de Ranger
+install ranger
 
 #   Instalación de Xclip
-sudo apt install xclip -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_xclip=1
-fi
-#   FIN Instalación de Xclip
+install xclip
 
 #   Instalación de Firejail
-sudo apt install firejail -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_firejail=1
-fi
-#   Fin Instalación de Firejail
+install firejail
 
 #   Instalación de Feh
-sudo apt install feh -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_feh=1
-fi
-#   FIN Instalación de Feh
+install feh
 
 #   Instalación de Display
-sudo apt install display -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_display=1
-fi
-#   FIN Instalación de Display
+install display
 
+#   Instalación HTOP
+install htop
+
+#   Instalación Geo-IP
+install geoip-bin
+
+#   Instalación MediaInfo
+install mediainfo
+
+#   Instalación Audacity
+install Audacity
+
+#   Instalación Zathura
+install Zathura
+
+#   Instalación shred
+install shred
+
+#   Instalación hollywood
+install hollywood
+
+#   Instalación de Neovim
+install neovim
+
+mkdir -p ~/.config/nvim
+mkdir ~/.config/nvim/autoload
+mkdir ~/.config/nvim/plugins
+cd ~/.config/nvim/autoload
+wget https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+cd $Directory
+
+
+
+#   FIN instalación de Neovim
+
+#   Instalación de Impacket
+install python3-Impacket
+
+if [ "$(echo $?)" = "0" ]; then
+    if [[ $(cat ~/.zshrc | grep 'ALIAS COMPARTIR') = "" ]]; then
+    echo "#    ALIAS COMPARTIR - impacket-smbserver
+    alias compartir='/usr/bin/impacket-smbserver Carpeta $(pwd) -smb2support -username Andres -password Andres123" >> ~/.zshrc
+    fi
+fi
 #   Instalación de VPN [Surfshark]
 cd ~/Downloads || cd ~/Descargas
 wget https://ocean.surfshark.com/debian/pool/main/s/surfshark-release/surfshark-release_1.0.0-2_amd64.deb
@@ -91,115 +117,74 @@ sudo dpkg -i surfshark-release_1.0.0-2_amd64.deb
 sudo apt update -y
 sudo apt install surfshark-vpn -y
 if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_surfshark=1
+    errores+=("Surfshark")
 fi
-#   FIN Instalación de VPN [Surfshark]
 
 #   Instalación de LSD
 cd ~/Downloads || cd ~/Descargas
-wget https://github.com/Peltoche/lsd/releases/download/0.20.1/lsd_0.20.1_amd64.deb
-sudo dpkg -i lsd_0.20.1_amd64.deb
+wget https://github.com/Peltoche/lsd/releases/download/0.21.0/lsd_0.21.0_amd64.deb
+sudo dpkg -i lsd_0.21.0_amd64.deb
 if [ "$(echo $?)" = "0" ]; then
-    if [ "$(which lsd)" = "/bin/lsd" ]; then
-        sudo echo "#    ALIAS LSD
-        alias ls='/bin/lsd'" >> ~/.zshrc
-    elif [ $(which lsd) = "/usr/sbin/lsd" ]; then
-        sudo echo "#    ALIAS LSD
-        alias ls='/usr/sbin/lsd'" >> ~/.zshrc
-    elif [ $(which lsd) = "/usr/bin/lsd" ]; then
-        sudo echo "#    ALIAS LSD
-        alias ls='/usr/bin/lsd'" >> ~/.zshrc
+    if [[ $(cat ~/.zshrc | grep 'ALIAS LSD') = "" ]]; then
+        if [ "$(which lsd)" = "/bin/lsd" ]; then
+            sudo echo "#    ALIAS LSD
+            alias ls='/bin/lsd'" >> ~/.zshrc
+        elif [ $(which lsd) = "/usr/sbin/lsd" ]; then
+            sudo echo "#    ALIAS LSD
+            alias ls='/usr/sbin/lsd'" >> ~/.zshrc
+        elif [ $(which lsd) = "/usr/bin/lsd" ]; then
+            sudo echo "#    ALIAS LSD
+            alias ls='/usr/bin/lsd'" >> ~/.zshrc
+        fi
     fi
 else
-    ERR_lsd=1
-    ERROR=1
+    errores+=("LSD")
 fi
-#   FIN Instalación de LSD
+
 
 #   Instalación de bat
 cd ~/Downloads || cd ~/Descargas
-wget https://github.com/sharkdp/bat/releases/download/v0.18.2/bat_0.18.2_amd64.deb
-sudo dpkg -i bat_0.18.2_amd64.deb
+wget https://github.com/sharkdp/bat/releases/download/v0.21.0/bat_0.21.0_amd64.deb
+sudo dpkg -i bat_0.21.0_amd64.deb
 if [ "$(echo $?)" = "0" ]; then
-    if [ "$(which bat)" = "/bin/bat" ]; then
-        sudo echo "#    ALIAS BAT
-        alias cat='/bin/bat'
-        alias catn='/bin/cat'
-        alias catnl='/bin/bat --paging=never'" >> ~/.zshrc
-    elif [ $(which bat) = "/usr/sbin/bat" ]; then
-        sudo echo "#    ALIAS BAT
-        alias cat='/usr/sbin/bat'
-        alias catn='$(which cat)'
-        alias catnl='/usr/sbin/bat --paging=never'" >> ~/.zshrc
-    elif [ $(which bat) = "/usr/bin/bat" ]; then
-        sudo echo "#    ALIAS BAT
-        alias cat='/usr/bin/bat'
-        alias catn='$(which cat)'
-        alias catnl='/usr/bin/bat --paging=never'" >> ~/.zshrc
+    if [[ $(cat ~/.zshrc | grep 'ALIAS BAT') = "" ]]; then
+        if [ "$(which bat)" = "/bin/bat" ]; then
+            sudo echo "#    ALIAS BAT
+            alias cat='/bin/bat'
+            alias catn='/bin/cat'
+            alias catnl='/bin/bat --paging=never'" >> ~/.zshrc
+        elif [ $(which bat) = "/usr/sbin/bat" ]; then
+            sudo echo "#    ALIAS BAT
+            alias cat='/usr/sbin/bat'
+            alias catn='$(which cat)'
+            alias catnl='/usr/sbin/bat --paging=never'" >> ~/.zshrc
+        elif [ $(which bat) = "/usr/bin/bat" ]; then
+            sudo echo "#    ALIAS BAT
+            alias cat='/usr/bin/bat'
+            alias catn='$(which cat)'
+            alias catnl='/usr/bin/bat --paging=never'" >> ~/.zshrc
+        fi
     fi
 else
-    ERROR=1
-    ERR_bat=1
+    errores+=("Bat")
 fi
 
 #   FIN Instalación de bat
 
-#   Instalación HTOP
-sudo apt install htop -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_htop=1
-fi
-#   FIN Instalación HTOP
+#   Instalacion de fuentes de letra
 
-#   Instalación Geo-IP
-sudo apt install geoip-bin -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_Geo=1
-fi
-#   FIN Instalación Geo-IP
+mkdir -p ~/.local/share/fonts/Cascadia
+mkdir ~/.local/share/fonts/NotoColorEmoji
+cd ~/Downloads || cd ~/Descargas
+mkdir TEMP_fonts
+cd TEMP_fonts
+wget https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf
+mv NotoColorEmoji.ttf ~/.local/share/fonts/NotoColorEmoji
+wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/CascadiaCode.zip
+unzip CascadiaCode.zip
+mv *.ttf ~/.local/share/fonts/Cascadia/
 
-#   Instalación MediaInfo
-sudo apt install mediainfo -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_MediaInfo=1
-fi
-#   FIN Instalación MediaInfo
-
-#   Instalación Audacity
-sudo apt install Audacity -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_Audacity=1
-fi
-#   FIN Instalación Audacity
-
-#   Instalación Zathura
-sudo apt install Zathura -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_Zathura=1
-fi
-#   FIN Instalación Zathura
-
-#   Instalación shred
-sudo apt install shred -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_shred=1
-fi
-#   FIN Instalación shred
-
-#   Instalación hollywood
-sudo apt install hollywood -y
-if [ "$(echo $?)" = "1" ]; then
-    ERROR=1
-    ERR_Hollywood=1
-fi
-#   FIN Instalación hollywood
+#   FIN Instalación de fuentes de letra
 
 ############### impacket-smbserver smbFolder $(pwd) -smb2support -username Andres -password Andres123
 
@@ -207,44 +192,16 @@ fi
 
 echo "Recomendaciones:
 [*] Si no has instalado FoxyProxy.. Instalalo por favor.
-[*] Que no se te olvide aplicar la fuente de letra
+[*] Falta aplicar las fuentes de letra en la terminal.
 "
-if [ $ERROR = 1 ]; then
-    echo "[!!]Ha habido complicaciones.. Sobre:"
-    if [ $ERR_bat = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'BAT'"
-    elif [ $ERR_lsd = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'LSD'"
-    elif [ $ERR_htop = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'HTOP'"
-    elif [ $ERR_surfshark = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'SURFSHARK'"
-    elif [ $ERR_rofi = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'ROFI'(sxhkd)"
-    elif [ $ERR_ranger = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'RANGER'"
-    elif [ $ERR_fzf = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'FZF'"
-    elif [ $ERR_xclip = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'XCLIP'"
-    elif [ $ERR_display = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'DISPLAY'"
-    elif [ $ERR_feh = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'FEH'"
-    elif [ $ERR_firejail = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'FIREJAIL'"
-    elif [ $ERR_Geo = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'Geo-IP'"
-    elif [ $ERR_MediaInfo = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'MediaInfo'"
-    elif [ $ERR_Audacity = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'Audacity'"
-    elif [ $ERR_Zathura = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'Zathura'"
-    elif [ $ERR_shred = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'Shred'"
-    elif [ $ERR_Hollywood = 1 ]; then
-        echo "[*] Problema con la instalacion del comando 'Hollywood'"
+
+if [ ${#errores} -gt 0 ]; then
+    clear
+    echo "[!!] Ha habido complicaciones.. [!!]"
+    for i in "${errores[@]}"
+    do
+        echo -e "[*] Failed to install the packet: \e[1;33$i\e[0m \n"
+    done
 else
     echo "Todo ha salido perfecto, ni un solo error ¡ENHORABUENA!"
 fi
