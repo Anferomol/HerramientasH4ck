@@ -90,6 +90,9 @@ install hollywood
 #   Instalación de Neovim
 install neovim
 
+#   Instalación de Horst
+install horst
+
 mkdir -p ~/.config/nvim
 mkdir ~/.config/nvim/autoload
 mkdir ~/.config/nvim/plugins
